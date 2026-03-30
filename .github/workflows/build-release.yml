@@ -1,0 +1,127 @@
+name: Build and Release macOS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run code generation (Drift / Riverpod)
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Install macOS CocoaPods dependencies
+        run: |
+          cd macos
+          pod install --repo-update
+        env:
+          COCOAPODS_DISABLE_STATS: 'true'
+
+      - name: Build macOS release
+        run: flutter build macos --release
+
+      - name: Create DMG archive
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/MarkCraft.app"
+          DMG_NAME="MarkCraft-macOS-${{ github.sha }}.dmg"
+          
+          hdiutil create \
+            -volname "MarkCraft" \
+            -srcfolder "$APP_PATH" \
+            -ov \
+            -format UDZO \
+            "$DMG_NAME"
+          
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
+
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d '[:space:]')
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "App version: $VERSION"
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          TAG="v${{ steps.version.outputs.VERSION }}-build-${TIMESTAMP}-${SHORT_SHA}"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $TAG"
+
+      - name: Create Draft GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          release_name: "MarkCraft ${{ steps.version.outputs.VERSION }} (${{ github.sha }})"
+          body: |
+            ## MarkCraft macOS Release
+
+            **Build:** `${{ github.sha }}`
+            **Branch:** `${{ github.ref_name }}`
+            **Version:** `${{ steps.version.outputs.VERSION }}`
+            **Built at:** ${{ github.event.head_commit.timestamp }}
+
+            ### What's included
+            - Full macOS desktop application (`.dmg`)
+            - Supports Apple Silicon (arm64) and Intel (x86_64)
+
+            ### Installation
+            1. Download `MarkCraft-macOS-*.dmg`
+            2. Open the DMG and drag MarkCraft to Applications
+            3. On first launch, right-click → Open to bypass Gatekeeper (unsigned build)
+
+            ### Changes in this build
+            ${{ github.event.head_commit.message }}
+          draft: true
+          prerelease: false
+
+      - name: Upload DMG to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.DMG_NAME }}
+          asset_name: ${{ env.DMG_NAME }}
+          asset_content_type: application/x-apple-diskimage
+
+      - name: Upload build artifacts (fallback)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MarkCraft-macOS-${{ github.sha }}
+          path: build/macos/Build/Products/Release/MarkCraft.app
+          retention-days: 30
+          if-no-files-found: warn

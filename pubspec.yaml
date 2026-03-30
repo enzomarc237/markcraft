@@ -1,0 +1,89 @@
+name: markcraft
+description: A high-tier macOS Markdown note-taking app built with Flutter.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+
+  # Markdown Rendering
+  markdown_widget: ^2.3.2+6
+
+  # File System & Vault
+  file_picker: ^6.1.1
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  watcher: ^1.1.0
+
+  # Local Database (SQLite/Drift)
+  drift: ^2.13.1
+  drift_flutter: ^0.1.0
+  sqlite3_flutter_libs: ^0.5.18
+
+  # Code Syntax Highlighting
+  flutter_highlight: ^0.7.0
+  highlight: ^0.7.0
+
+  # LaTeX Math Rendering
+  flutter_math_fork: ^0.7.2
+
+  # WebView (for Mermaid diagrams)
+  webview_flutter: ^4.4.2
+  webview_flutter_macos: ^0.0.1+3
+
+  # Fuzzy Search
+  fuzzy: ^0.5.1
+
+  # YAML Parsing (frontmatter)
+  yaml: ^3.1.2
+
+  # Shared Preferences (app settings)
+  shared_preferences: ^2.2.2
+
+  # URL Launcher
+  url_launcher: ^6.2.1
+
+  # PDF Export
+  pdf: ^3.10.7
+  printing: ^5.11.1
+
+  # System Tray (Menu Bar Quick Capture)
+  tray_manager: ^0.2.1
+
+  # Window Manager (for floating windows)
+  window_manager: ^0.3.7
+
+  # Google Fonts (runtime download, no bundling needed)
+  google_fonts: ^6.1.0
+
+  # Intl for date formatting
+  intl: ^0.18.1
+
+  # UUID
+  uuid: ^4.2.1
+
+  # Icons
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.7
+  drift_dev: ^2.13.1
+  riverpod_generator: ^2.3.0
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/html/
+    - assets/icons/
