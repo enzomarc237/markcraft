@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="content" class="mermaid"></div>
+  <script>
+    mermaid.initialize({ startOnLoad: false });
+    
+    function renderDiagram(code, theme) {
+      const el = document.getElementById('content');
+      el.textContent = code;
+      mermaid.init({ theme: theme }, el).then(() => {
+        const svg = el.querySelector('svg');
+        if (svg && window.Flutter) {
+          window.Flutter.postMessage(svg.getBoundingClientRect().height.toString());
+        }
+      });
+    }
+  </script>
+</body>
+</html>
