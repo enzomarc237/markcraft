@@ -3,10 +3,10 @@ import 'package:path/path.dart' as p;
 import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../domain/entities/note.dart';
-import '../../domain/entities/folder.dart';
-import '../../domain/entities/vault.dart';
-import '../../core/constants/app_constants.dart';
+import '../../../domain/entities/note.dart';
+import '../../../domain/entities/folder.dart';
+import '../../../domain/entities/vault.dart';
+import '../../../core/constants/app_constants.dart';
 
 /// Service for interacting with the file system.
 class FileSystemService {

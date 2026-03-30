@@ -212,7 +212,7 @@ class _EditorPaneState extends ConsumerState<EditorPane> {
     if (!selection.isValid) return;
 
     final text = _controller.text;
-    final selected = selection.textInside(text);
+    final selected = text.substring(selection.start, selection.end);
 
     String newText;
     int newCursorPos;
@@ -244,9 +244,8 @@ class _EditorPaneState extends ConsumerState<EditorPane> {
     if (!selection.isValid) return;
 
     final text = _controller.text;
-    final selected = selection.textInside(text);
+    final selected = text.substring(selection.start, selection.end);
     final linkText = selected.isEmpty ? 'Link Text' : selected;
-    const linkUrl = 'https://';
 
     final inserted = '[$linkText]($linkUrl)';
     final newText = text.substring(0, selection.start) +
@@ -406,7 +405,7 @@ class _EditorToolbar extends ConsumerWidget {
     if (!selection.isValid) return;
 
     final text = controller.text;
-    final selected = selection.textInside(text);
+    final selected = text.substring(selection.start, selection.end);
 
     if (selected.isEmpty) {
       final newText = text.substring(0, selection.baseOffset) +
